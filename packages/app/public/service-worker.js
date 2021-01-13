@@ -7,7 +7,14 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  event.respondWith(onRequest(event.request));
+  const { request } = event;
+  const { destination, cache, mode } = request;
+
+  if (destination || (cache === "only-if-cached" && mode !== "same-origin")) {
+    return;
+  }
+
+  event.respondWith(onRequest(request));
 });
 
 self.addEventListener("message", async ({ data }) => {
@@ -39,11 +46,6 @@ function sendToClient(client, message) {
 
 async function onRequest(request) {
   const getOriginalResponse = () => fetch(request);
-
-  if (request.destination) {
-    return getOriginalResponse();
-  }
-
   const clients = await getClients();
 
   if (!clients || !clients.length) {
