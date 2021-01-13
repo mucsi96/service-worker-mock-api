@@ -1,0 +1,13 @@
+{
+  "name": "service-worker-mock-api",
+  "version": "1.0.0",
+  "description": "Mock API based on service worker",
+  "main": "index.js",
+  "repository": "git@github.com:mucsi96/service-worker-mock-api.git",
+  "author": "Igor Bari <mucsi96@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
