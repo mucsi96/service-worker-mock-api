@@ -7,39 +7,43 @@ self.addEventListener("message", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  const requestUrl = new URL(event.request.url);
+  event.respondWith(onRequest(event.request));
+});
 
-  if (event.request.destination) {
-    return;
+async function onRequest(request) {
+  if (request.destination) {
+    return await fetch(request);
   }
 
-  self.clients
-    .matchAll({
-      includeUncontrolled: true,
-      type: "window",
-    })
-    .then((clients) => {
-      if (clients && clients.length) {
-        // Send a response - the clients
-        // array is ordered by last focused
-        // https://developers.google.com/web/fundamentals/push-notifications/common-notification-patterns
-        // https://developer.mozilla.org/en-US/docs/Web/API/Client/postMessage
-        // https://github.com/jbmoelker/serviceworker-introduction
+  const clients = await self.clients.matchAll({
+    includeUncontrolled: true,
+    type: "window",
+  });
 
-        clients[0].postMessage({
-          type: "REQUEST",
-          request: {
-            url: event.request.url,
-            credentials: event.request.credentials,
-            destination: event.request.destination,
-            mode: event.request.mode,
-          },
-        });
-      }
+  if (clients && clients.length) {
+    // Send a response - the clients
+    // array is ordered by last focused
+    // https://developers.google.com/web/fundamentals/push-notifications/common-notification-patterns
+    // https://developer.mozilla.org/en-US/docs/Web/API/Client/postMessage
+    // https://github.com/jbmoelker/serviceworker-introduction
+
+    clients[0].postMessage({
+      type: "REQUEST",
+      request: {
+        url: request.url,
+        credentials: request.credentials,
+        destination: request.destination,
+        mode: request.mode,
+      },
     });
+  }
+
+  const requestUrl = new URL(request.url);
 
   if (requestUrl.pathname === "/hello") {
-    console.log(event.request.url);
-    event.respondWith(new Response(JSON.stringify({ hello: "word10" })));
+    console.log(request.url);
+    return new Response(JSON.stringify({ hello: "word10" }));
   }
-});
+
+  return await fetch(request);
+}
