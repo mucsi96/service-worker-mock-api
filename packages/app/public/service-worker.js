@@ -2,48 +2,65 @@ self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
-self.addEventListener("message", (event) => {
-  console.log(event.data);
+self.addEventListener("activate", (event) => {
+  event.waitUntil(clients.claim());
 });
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(onRequest(event.request));
 });
 
-async function onRequest(request) {
-  if (request.destination) {
-    return await fetch(request);
-  }
+self.addEventListener("message", async ({ data }) => {
+  if (data && data.type === "CLIENT_CLOSED") {
+    const clients = await getClients();
 
-  const clients = await self.clients.matchAll({
+    if (!clients || !clients.length || clients.length === 1) {
+      self.registration.unregister();
+    }
+  }
+});
+
+async function getClients() {
+  return await self.clients.matchAll({
     includeUncontrolled: true,
     type: "window",
   });
+}
 
-  if (clients && clients.length) {
-    // Send a response - the clients
-    // array is ordered by last focused
-    // https://developers.google.com/web/fundamentals/push-notifications/common-notification-patterns
-    // https://developer.mozilla.org/en-US/docs/Web/API/Client/postMessage
-    // https://github.com/jbmoelker/serviceworker-introduction
+function sendToClient(client, message) {
+  return new Promise((resolve) => {
+    const channel = new MessageChannel();
 
-    clients[0].postMessage({
-      type: "REQUEST",
-      request: {
-        url: request.url,
-        credentials: request.credentials,
-        destination: request.destination,
-        mode: request.mode,
-      },
-    });
+    channel.port1.onmessage = (event) => resolve(event.data);
+
+    client.postMessage(message, [channel.port2]);
+  });
+}
+
+async function onRequest(request) {
+  const getOriginalResponse = () => fetch(request);
+
+  if (request.destination) {
+    return getOriginalResponse();
   }
 
-  const requestUrl = new URL(request.url);
+  const clients = await getClients();
 
-  if (requestUrl.pathname === "/hello") {
-    console.log(request.url);
-    return new Response(JSON.stringify({ hello: "word10" }));
+  if (!clients || !clients.length) {
+    return getOriginalResponse();
   }
 
-  return await fetch(request);
+  const { type, response } = await sendToClient(clients[0], {
+    type: "REQUEST",
+    request: {
+      url: request.url,
+      method: request.method,
+    },
+  });
+
+  if (type !== "MOCK_SUCCESS") {
+    return getOriginalResponse();
+  }
+
+  return new Response(JSON.stringify(response));
 }

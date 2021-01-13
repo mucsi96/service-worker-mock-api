@@ -1,19 +1,29 @@
 navigator.serviceWorker
   .register(`service-worker.js`, { scope: "./" })
-  .then(function (reg) {
-    console.info("registered sw", reg);
-  })
-  .catch(function (err) {
-    console.error("error registering sw", err);
-  });
+  .catch((err) => console.error("error registering sw", err));
 
-navigator.serviceWorker.onmessage = (event) => {
-  if (event.data && event.data.type === "REQUEST") {
-    const requestUrl = new URL(event.data.request.url);
-    console.log(event.data.request);
+window.addEventListener("beforeunload", () => {
+  if (navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: "CLIENT_CLOSED" });
+  }
+});
+
+navigator.serviceWorker.onmessage = ({ data, ports }) => {
+  if (data && data.type === "REQUEST") {
+    const { url } = data.request;
+    const requestUrl = new URL(url);
+    const port = ports[0];
 
     if (requestUrl.pathname === "/hello") {
-      event.source.postMessage({ hello: "word10" });
+      port.postMessage({
+        response: { hello: "word10" },
+        type: "MOCK_SUCCESS",
+      });
+      return;
     }
+
+    port.postMessage({
+      type: "MOCK_NOT_FOUND",
+    });
   }
 };
