@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "mockApi": "1.0.0"
+    "mock-api": "1.0.0"
   },
   "devDependencies": {
     "webpack": "4.44.2",

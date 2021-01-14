@@ -1,5 +1,5 @@
 {
-  "name": "mockApi",
+  "name": "mock-api",
   "version": "1.0.0",
   "license": "MIT",
   "main": "./lib/index.js",
@@ -13,7 +13,7 @@
     "node": ">= 10.0.0"
   },
   "scripts": {
-    "build": "del-cli lib && tsc --declaration --sourceMap --outDir lib",
+    "build": "del-cli lib && tsc --declaration --outDir lib",
     "prepack": "npm run build",
     "update:dependencies": "npx npm-check-updates -u"
   },

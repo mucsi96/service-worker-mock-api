@@ -20,7 +20,7 @@ sw.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(createResponse(clientId, request));
+  return event.respondWith(createResponse(clientId, request));
 });
 
 sw.addEventListener("message", async ({ data }) => {

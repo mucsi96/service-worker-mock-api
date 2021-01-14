@@ -1,4 +1,4 @@
-import { registerMocks } from "mockApi";
+import { registerMocks } from "mock-api";
 
 registerMocks([
   {

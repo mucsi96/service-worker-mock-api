@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const {
   MockApiServiceWorkerWebpackPlugin,
-} = require("mockApi/lib/MockApiServiceWorkerWebpackPlugin");
+} = require("mock-api/lib/MockApiServiceWorkerWebpackPlugin");
 
 module.exports = {
   mode: "development",
