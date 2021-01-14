@@ -5,6 +5,7 @@ const serviceWorker = readFileSync(
   { encoding: "utf8" }
 );
 
+// Source: https://webpack.js.org/contribute/writing-a-plugin/#example
 class MockApiServiceWorkerWebpackPlugin {
   apply(compiler) {
     compiler.hooks.emit.tapAsync(
