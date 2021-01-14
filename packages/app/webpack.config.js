@@ -1,6 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const MockApiServiceWorkerWebpackPlugin = require("./src/MockApiServiceWorkerWebpackPlugin");
 
 module.exports = {
   mode: "development",
@@ -12,6 +13,7 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
     new HtmlWebpackPlugin(),
+    new MockApiServiceWorkerWebpackPlugin(),
   ],
   devtool: "inline-source-map",
   devServer: {

@@ -1,5 +1,5 @@
 navigator.serviceWorker
-  .register(`service-worker.js`, { scope: "./" })
+  .register(`mockApiServiceWorker.js`, { scope: "./" })
   .catch((err) => console.error("error registering sw", err));
 
 window.addEventListener("beforeunload", () => {
