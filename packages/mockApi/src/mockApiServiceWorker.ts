@@ -1,12 +1,14 @@
-self.addEventListener("install", () => {
-  self.skipWaiting();
+const sw = (self as unknown) as ServiceWorkerGlobalScope;
+
+sw.addEventListener("install", () => {
+  sw.skipWaiting();
 });
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(clients.claim());
+sw.addEventListener("activate", (event) => {
+  event.waitUntil(sw.clients.claim());
 });
 
-self.addEventListener("fetch", (event) => {
+sw.addEventListener("fetch", (event) => {
   const { request, clientId } = event;
   const { destination, cache, mode } = request;
 
@@ -21,24 +23,27 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(createResponse(clientId, request));
 });
 
-self.addEventListener("message", async ({ data }) => {
+sw.addEventListener("message", async ({ data }) => {
   if (data && data.type === "CLIENT_CLOSED") {
     const clients = await getClients();
 
     if (!clients || !clients.length || clients.length === 1) {
-      self.registration.unregister();
+      sw.registration.unregister();
     }
   }
 });
 
 async function getClients() {
-  return await self.clients.matchAll({
+  return await sw.clients.matchAll({
     includeUncontrolled: true,
     type: "window",
   });
 }
 
-function sendToClient(client, message) {
+function sendToClient(
+  client: Client,
+  message: object
+): Promise<{ type: string; response: object }> {
   return new Promise((resolve) => {
     const channel = new MessageChannel();
 
@@ -48,9 +53,9 @@ function sendToClient(client, message) {
   });
 }
 
-async function createResponse(clientId, request) {
+async function createResponse(clientId: string, request: Request) {
   const getOriginalResponse = () => fetch(request);
-  const client = await self.clients.get(clientId);
+  const client = await sw.clients.get(clientId);
 
   if (!client) {
     return getOriginalResponse();

@@ -1,13 +1,13 @@
+import { Compiler } from "webpack";
+
 const { readFileSync } = require("fs");
-const { resolve } = require("path");
-const serviceWorker = readFileSync(
-  resolve(__dirname, "mockApiServiceWorker.js"),
-  { encoding: "utf8" }
-);
+const serviceWorker = readFileSync(require.resolve("./mockApiServiceWorker"), {
+  encoding: "utf8",
+});
 
 // Source: https://webpack.js.org/contribute/writing-a-plugin/#example
-class MockApiServiceWorkerWebpackPlugin {
-  apply(compiler) {
+export class MockApiServiceWorkerWebpackPlugin {
+  apply(compiler: Compiler) {
     compiler.hooks.emit.tapAsync(
       "MockApiServiceWorkerWebpackPlugin",
       (compilation, callback) => {
@@ -21,5 +21,3 @@ class MockApiServiceWorkerWebpackPlugin {
     );
   }
 }
-
-module.exports = MockApiServiceWorkerWebpackPlugin;

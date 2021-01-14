@@ -1,7 +1,9 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const MockApiServiceWorkerWebpackPlugin = require("./src/MockApiServiceWorkerWebpackPlugin");
+const {
+  MockApiServiceWorkerWebpackPlugin,
+} = require("mockApi/lib/MockApiServiceWorkerWebpackPlugin");
 
 module.exports = {
   mode: "development",

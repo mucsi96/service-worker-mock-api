@@ -1,4 +1,18 @@
-export function registerMocks(mocks) {
+export type MockRequest = {
+  url: string;
+};
+
+export type MockResponse = {};
+
+export type Mock = {
+  path: string;
+  callback: (
+    req: MockRequest,
+    res: MockResponse
+  ) => Promise<object | undefined> | object | undefined;
+};
+
+export function registerMocks(mocks: Mock[]): void {
   navigator.serviceWorker
     .register(`mockApiServiceWorker.js`, { scope: "./" })
     .catch((err) => console.error("error registering sw", err));
@@ -22,7 +36,7 @@ export function registerMocks(mocks) {
       }
 
       port.postMessage({
-        response: await mock.callback({ url: requestUrl }, {}),
+        response: await mock.callback({ url }, {}),
         type: "MOCK_SUCCESS",
       });
     }

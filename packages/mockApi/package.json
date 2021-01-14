@@ -1,0 +1,27 @@
+{
+  "name": "mockApi",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "bin": "./lib/cli.js",
+  "files": [
+    "lib",
+    "config"
+  ],
+  "engines": {
+    "node": ">= 10.0.0"
+  },
+  "scripts": {
+    "build": "del-cli lib && tsc --declaration --sourceMap --outDir lib",
+    "prepack": "npm run build",
+    "update:dependencies": "npx npm-check-updates -u"
+  },
+  "devDependencies": {
+    "typescript": "3.4.3",
+    "@types/node": "12.12.2",
+    "path-to-regexp": "6.2.0",
+    "@types/webpack": "4.1.4",
+    "del-cli": "3.0.1"
+  }
+}
