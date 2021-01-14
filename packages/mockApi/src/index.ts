@@ -1,3 +1,5 @@
+import { pathToRegexp } from "path-to-regexp";
+
 export type MockRequest = {
   url: string;
 };
@@ -13,6 +15,11 @@ export type Mock = {
 };
 
 export function registerMocks(mocks: Mock[]): void {
+  const mocksWithRegexp = mocks.map((mock) => ({
+    regexp: pathToRegexp(mock.path),
+    ...mock,
+  }));
+
   navigator.serviceWorker
     .register(`mockApiServiceWorker.js`, { scope: "./" })
     .catch((err) => console.error("error registering sw", err));
@@ -27,7 +34,7 @@ export function registerMocks(mocks: Mock[]): void {
     if (data && data.type === "REQUEST") {
       const { url } = data.request;
       const port = ports[0];
-      const mock = mocks.find(({ path }) => path === url);
+      const mock = mocksWithRegexp.find(({ regexp }) => regexp.test(url));
 
       if (!mock) {
         return port.postMessage({
