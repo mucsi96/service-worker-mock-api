@@ -1,29 +1,32 @@
-navigator.serviceWorker
-  .register(`mockApiServiceWorker.js`, { scope: "./" })
-  .catch((err) => console.error("error registering sw", err));
+export function registerMocks(mocks) {
+  navigator.serviceWorker
+    .register(`mockApiServiceWorker.js`, { scope: "./" })
+    .catch((err) => console.error("error registering sw", err));
 
-window.addEventListener("beforeunload", () => {
-  if (navigator.serviceWorker.controller) {
-    navigator.serviceWorker.controller.postMessage({ type: "CLIENT_CLOSED" });
-  }
-});
+  window.addEventListener("beforeunload", () => {
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: "CLIENT_CLOSED" });
+    }
+  });
 
-navigator.serviceWorker.onmessage = ({ data, ports }) => {
-  if (data && data.type === "REQUEST") {
-    const { url } = data.request;
-    const requestUrl = new URL(url);
-    const port = ports[0];
+  navigator.serviceWorker.onmessage = async ({ data, ports }) => {
+    if (data && data.type === "REQUEST") {
+      const { url } = data.request;
+      const requestUrl = new URL(url);
+      const port = ports[0];
 
-    if (requestUrl.pathname === "/hello") {
+      const mock = mocks.find(({ path }) => path === requestUrl.pathname);
+
+      if (!mock) {
+        return port.postMessage({
+          type: "MOCK_NOT_FOUND",
+        });
+      }
+
       port.postMessage({
-        response: { hello: "word10" },
+        response: await mock.callback({ url: requestUrl }, {}),
         type: "MOCK_SUCCESS",
       });
-      return;
     }
-
-    port.postMessage({
-      type: "MOCK_NOT_FOUND",
-    });
-  }
-};
+  };
+}

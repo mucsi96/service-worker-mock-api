@@ -1,4 +1,13 @@
-import "./mockApi";
+import { registerMocks } from "./mockApi";
+
+registerMocks([
+  {
+    path: "/hello",
+    callback() {
+      return { hello: "word10" };
+    },
+  },
+]);
 
 const button = document.createElement("button");
 
