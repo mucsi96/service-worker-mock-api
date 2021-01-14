@@ -56,11 +56,14 @@ async function createResponse(clientId, request) {
     return getOriginalResponse();
   }
 
+  const { url, method } = request;
+  const urlPath = new URL(url).pathname;
+
   const { type, response } = await sendToClient(client, {
     type: "REQUEST",
     request: {
-      url: request.url,
-      method: request.method,
+      url: urlPath,
+      method: method,
     },
   });
 

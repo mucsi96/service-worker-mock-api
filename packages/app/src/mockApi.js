@@ -12,10 +12,8 @@ export function registerMocks(mocks) {
   navigator.serviceWorker.onmessage = async ({ data, ports }) => {
     if (data && data.type === "REQUEST") {
       const { url } = data.request;
-      const requestUrl = new URL(url);
       const port = ports[0];
-
-      const mock = mocks.find(({ path }) => path === requestUrl.pathname);
+      const mock = mocks.find(({ path }) => path === url);
 
       if (!mock) {
         return port.postMessage({
