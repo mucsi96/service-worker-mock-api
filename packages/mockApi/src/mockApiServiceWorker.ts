@@ -62,13 +62,16 @@ async function createResponse(clientId: string, request: Request) {
   }
 
   const { url, method } = request;
-  const urlPath = new URL(url).pathname;
+  const body = await request.text();
+  const headers = getHeaders(request);
 
   const { type, response } = await sendToClient(client, {
     type: "REQUEST",
     request: {
-      url: urlPath,
-      method: method,
+      url,
+      method,
+      body,
+      headers,
     },
   });
 
@@ -77,4 +80,23 @@ async function createResponse(clientId: string, request: Request) {
   }
 
   return new Response(JSON.stringify(response));
+}
+
+function getHeaders(request: Request) {
+  const headers = {} as Record<string, string | string[]>;
+
+  request.headers.forEach((value, name) => {
+    if (Array.isArray(headers[name])) {
+      headers[name] = [...headers[name], value];
+      return;
+    }
+
+    if (headers[name]) {
+      headers[name] = [headers[name] as string, value];
+      return;
+    }
+
+    headers[name] = value;
+  });
+  return headers;
 }
