@@ -80,4 +80,47 @@ describe("mock-api", () => {
     const data = await response.json();
     expect(data.test).toEqual("body");
   });
+
+  it("mocks status", async () => {
+    getSpy.and.callFake((req, res) => res.status(500));
+    const response = await fetch("/todos/3/78");
+    expect(response.status).toEqual(500);
+  });
+
+  it("mocks delay", async () => {
+    const originalTimeout = window.setTimeout;
+    window.setTimeout = jasmine
+      .createSpy("setTimeout")
+      .and.callFake((callback) => callback());
+
+    getSpy.and.callFake((req, res) => {
+      res.delay(1003);
+      return { test: "body" };
+    });
+    const response = await fetch("/todos/3/78");
+    const data = await response.json();
+    expect(data.test).toEqual("body");
+
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+    expect(setTimeout.calls.first().args[1]).toEqual(1003);
+    window.setTimeout = originalTimeout;
+  });
+
+  it("mocks error", async () => {
+    getSpy.and.callFake((req, res) => res.mockError(true));
+    const response = await fetch("/todos/3/78");
+    const data = await response.json();
+    expect(response.status).toEqual(500);
+    expect(data.error.message).toEqual(
+      "We couldn't process your request at this time"
+    );
+  });
+
+  it("mocks html", async () => {
+    getSpy.and.callFake((req, res) => res.mockHTML(true));
+    const response = await fetch("/todos/3/78");
+    const html = await response.text();
+    expect(response.status).toEqual(200);
+    expect(html).toEqual("<html></html>");
+  });
 });

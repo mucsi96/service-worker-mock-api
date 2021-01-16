@@ -69,7 +69,11 @@ export function registerMocks(mocks: Mock[]): void {
         });
       }
 
-      const responseBody = await mock.callback(
+      let status = 200;
+      let delay: number | undefined;
+      let mockError = false;
+      let mockHTML = false;
+      let responseBody = await mock.callback(
         {
           ...data.request,
           url: url.pathname,
@@ -77,13 +81,38 @@ export function registerMocks(mocks: Mock[]): void {
           query: getQuery(url.searchParams),
           body: body && JSON.parse(body),
         },
-        {}
+        {
+          status(statusCode: number) {
+            status = statusCode;
+          },
+          delay(delayMs: number) {
+            delay = delayMs;
+          },
+          mockError(enable: boolean) {
+            mockError = enable;
+          },
+          mockHTML(enable: boolean) {
+            mockHTML = enable;
+          },
+        }
       );
+
+      if (mockError) {
+        responseBody = {
+          error: { message: "We couldn't process your request at this time" },
+        };
+      }
+
+      if (delay) {
+        await new Promise((resolve) => window.setTimeout(resolve, delay));
+      }
 
       port.postMessage({
         response: {
-          status: 200,
-          body: JSON.stringify(responseBody),
+          status: mockError ? 500 : status,
+          body: mockHTML
+            ? "<html></html>"
+            : responseBody && JSON.stringify(responseBody),
         },
         type: "MOCK_SUCCESS",
       });
