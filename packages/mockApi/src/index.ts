@@ -49,7 +49,11 @@ export function registerMocks(mocks: Mock[]): void {
 
   navigator.serviceWorker.onmessage = async ({ data, ports }) => {
     if (data && data.type === "REQUEST") {
-      const { url: fullUrl, method } = data.request as MockRequest;
+      const { url: fullUrl, method, body } = data.request as {
+        url: string;
+        method: string;
+        body: string;
+      };
       const url = new URL(fullUrl);
       const port = ports[0];
       const mock = mocksWithRegexp.find(
@@ -65,16 +69,22 @@ export function registerMocks(mocks: Mock[]): void {
         });
       }
 
+      const responseBody = await mock.callback(
+        {
+          ...data.request,
+          url: url.pathname,
+          params: getParams(match, mock),
+          query: getQuery(url.searchParams),
+          body: body && JSON.parse(body),
+        },
+        {}
+      );
+
       port.postMessage({
-        response: await mock.callback(
-          {
-            ...data.request,
-            url: url.pathname,
-            params: getParams(match, mock),
-            query: getQuery(url.searchParams),
-          },
-          {}
-        ),
+        response: {
+          status: 200,
+          body: JSON.stringify(responseBody),
+        },
         type: "MOCK_SUCCESS",
       });
     }

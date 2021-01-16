@@ -1,5 +1,3 @@
-import { registerMocks } from "mock-api";
-
 const tests = [
   {
     mock: {

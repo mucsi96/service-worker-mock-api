@@ -43,7 +43,7 @@ async function getClients() {
 function sendToClient(
   client: Client,
   message: object
-): Promise<{ type: string; response: object }> {
+): Promise<{ type: string; response: { body: string; status: number } }> {
   return new Promise((resolve) => {
     const channel = new MessageChannel();
 
@@ -79,7 +79,7 @@ async function createResponse(clientId: string, request: Request) {
     return getOriginalResponse();
   }
 
-  return new Response(JSON.stringify(response));
+  return new Response(response.body, { status: response.status });
 }
 
 function getHeaders(request: Request) {
